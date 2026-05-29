@@ -110,7 +110,7 @@ sync:
         - path: spec
           expression: |
             (value => {
-              var labels = context.virtualObject.metadata.labels;
+              var labels = context.virtualObject.metadata.labels || {};
               if (labels["k8s-app"] === "vcluster-kube-dns") {
                 return value;
               }
