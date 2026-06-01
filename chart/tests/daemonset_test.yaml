@@ -1,0 +1,43 @@
+suite: Candy DaemonSet
+templates:
+  - daemonset.yaml
+
+tests:
+  - it: should set the image tag to appVersion by default
+    chart:
+      appVersion: v1.2.3
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[?(@.name == "vcluster-candy")].image
+          value: ghcr.io/loft-sh/vcluster-candy:v1.2.3
+
+  - it: should set the image repository and tag
+    set:
+      image:
+        repository: test-registry/test-repository
+        tag: v1.2.3-test
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[?(@.name == "vcluster-candy")].image
+          value: test-registry/test-repository:v1.2.3-test
+
+  - it: should not set internal-domains by default
+    set:
+      service:
+        clusterIP: 10.0.0.53
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[?(@.name == "vcluster-candy")].args[*]
+          pattern: ^--internal-domains=.*$
+
+  - it: should set internal-domains flag
+    set:
+      service:
+        clusterIP: 10.0.0.53
+      internalDomains:
+        - cluster.local
+        - cluster.internal
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[?(@.name == "vcluster-candy")].args
+          content: --internal-domains=cluster.local,cluster.internal

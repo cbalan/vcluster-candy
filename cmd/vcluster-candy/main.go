@@ -42,7 +42,7 @@ func main() {
 	flag.StringVar(&dnsAddr, "dns-bind-address", ":53", "The address the dns server binds to.")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":9153", "The address the metrics endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
-	flag.StringVar(&internalDomainsString, "internal-domain", "cluster.local", "The internal domains to use for the DNS server.")
+	flag.StringVar(&internalDomainsString, "internal-domains", "cluster.local", "Comma-separated list of DNS suffixes considered internal to tenant clusters.")
 	flag.StringVar(&resolvconf, "resolvconf", "/etc/resolv.conf", "The resolv.conf file to use for the DNS server.")
 	flag.StringVar(&nodeName, "node-name", "", "The node name to filter pods by.")
 
