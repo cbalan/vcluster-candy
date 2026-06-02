@@ -97,3 +97,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# List of DNS suffixes considered "internal" to tenant clusters.
+internalDomains: []

@@ -2,7 +2,7 @@
 **C**luster-**A**ware **N**ode-local **D**NS prox**Y** for [vcluster](https://www.vcluster.com/) workloads.
 
 `vcluster-candy` runs as a DaemonSet on the host cluster and acts as a node-local
-DNS proxy for pods that belong to vclusters. For each DNS query it inspects the
+DNS proxy for pods that belong to tenant clusters. For each DNS query it inspects the
 **source pod IP**, determines which vcluster the pod belongs to, and routes the
 query to the right upstream:
 
@@ -128,30 +128,31 @@ sync:
 
 ### Command-line flags
 
-| Flag                          | Default            | Description                                                                            |
-|-------------------------------|--------------------|----------------------------------------------------------------------------------------|
+| Flag                          | Default            | Description                                                                                                                         |
+|-------------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------|
 | `--node-name`                 | _(required)_       | Name of the node this instance runs on. Used to scope the pod cache to the local node. Injected by the chart from the downward API. |
-| `--dns-bind-address`          | `:53`              | Address the DNS server binds to (UDP and TCP listeners are started).                   |
-| `--metrics-bind-address`      | `:9153`            | Address the Prometheus metrics endpoint binds to.                                      |
-| `--health-probe-bind-address` | `:8081`            | Address the health/readiness endpoints bind to (`/healthz`, `/readyz`).                |
-| `--internal-domain`           | `cluster.local`    | Comma-separated list of DNS suffixes considered "internal" to vclusters.               |
-| `--resolvconf`                | `/etc/resolv.conf` | Path to the `resolv.conf` file used to discover upstream servers for external queries. |
+| `--dns-bind-address`          | `:53`              | Address the DNS server binds to (UDP and TCP listeners are started).                                                                |
+| `--metrics-bind-address`      | `:9153`            | Address the Prometheus metrics endpoint binds to.                                                                                   |
+| `--health-probe-bind-address` | `:8081`            | Address the health/readiness endpoints bind to (`/healthz`, `/readyz`).                                                             |
+| `--internal-domains`          | `cluster.local`    | Comma-separated list of DNS suffixes considered "internal" to tenant clusters.                                                      |
+| `--resolvconf`                | `/etc/resolv.conf` | Path to the `resolv.conf` file used to discover upstream servers for external queries.                                              |
 
 Standard controller-runtime / zap logger flags are also accepted
 (e.g. `--zap-log-level`, `--zap-devel`).
 
 ### Helm values (selected)
 
-| Value                                       | Default                                                          | Description                                                                                                                            |
-|---------------------------------------------|------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `image.repository`                          | `ghcr.io/loft-sh/vcluster-candy`                                 | Container image repository.                                                                                                            |
-| `image.tag`                                 | chart `appVersion`                                               | Image tag.                                                                                                                             |
-| `service.clusterIP`                         | _(required)_                                                     | Stable ClusterIP for the candy Service. **Must be set.**                                                                               |
-| `resources`                                 | sensible defaults                                                | CPU/memory limits and requests.                                                                                                        |
-| `podSecurityContext`                        | `runAsNonRoot: true`, seccomp RuntimeDefault                     | Pod-level security context.                                                                                                            |
-| `securityContext`                           | drops all caps, adds `NET_BIND_SERVICE`, `readOnlyRootFilesystem` | Container-level security context (needed because the proxy binds privileged port 53).                                                  |
-| `livenessProbe` / `readinessProbe`          | HTTP `:8081`                                                     | Probes against the controller-runtime health endpoints.                                                                                |
-| `nodeSelector` / `tolerations` / `affinity` | empty                                                            | Standard pod scheduling controls.                                                                                                      |
+| Value                                       | Default                                                           | Description                                                                           |
+|---------------------------------------------|-------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `image.repository`                          | `ghcr.io/loft-sh/vcluster-candy`                                  | Container image repository.                                                           |
+| `image.tag`                                 | chart `appVersion`                                                | Image tag.                                                                            |
+| `service.clusterIP`                         | _(required)_                                                      | Stable ClusterIP for the candy Service. **Must be set.**                              |
+| `resources`                                 | sensible defaults                                                 | CPU/memory limits and requests.                                                       |
+| `podSecurityContext`                        | `runAsNonRoot: true`, seccomp RuntimeDefault                      | Pod-level security context.                                                           |
+| `securityContext`                           | drops all caps, adds `NET_BIND_SERVICE`, `readOnlyRootFilesystem` | Container-level security context (needed because the proxy binds privileged port 53). |
+| `livenessProbe` / `readinessProbe`          | HTTP `:8081`                                                      | Probes against the controller-runtime health endpoints.                               |
+| `nodeSelector` / `tolerations` / `affinity` | empty                                                             | Standard pod scheduling controls.                                                     |
+| `internalDomains`                           | empty                                                             | List of DNS suffixes considered "internal" to tenant clusters.                        |
 
 See [`chart/values.yaml`](chart/values.yaml) for the complete list.
 
